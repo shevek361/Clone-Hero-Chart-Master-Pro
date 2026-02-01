@@ -1,83 +1,67 @@
-==========================================================
-🎸 CH CHART MASTER PRO v1.9.6 - Kurzanleitung
-==========================================================
+CH Chart Master Pro v2.1.0 🎸
 
-Dieses Tool hilft dir dabei, für deine Clone Hero Expert-Charts 
-automatisch die Schwierigkeitsgrade Hard, Medium und Easy zu 
-erstellen ("Downcharting").
+CH Chart Master Pro is an AI-supported tool designed to automatically generate lower difficulty levels (Hard, Medium, Easy) for Clone Hero charts. It uses a hybrid approach of Pattern Recognition (from a learned library) and Musical Heuristics to create playable, high-quality charts that feel like they were made by a human.
+🌟 Key Features
 
-----------------------------------------------------------
-1. VORBEREITUNG
-----------------------------------------------------------
-Damit das Programm startet, muss Python installiert sein.
-Zudem wird die Bibliothek 'mido' benötigt.
-Öffne deine Kommandozeile (CMD) und gib ein:
+    Hybrid Intelligence: Combines a database of professional chart patterns with mathematical rules for chord simplification and fret distance.
 
-pip install mido
+    Library Builder: "Teach" the tool by feeding it existing professional charts. It learns how experts simplify complex riffs.
 
-----------------------------------------------------------
-2. DIE REITER (TABS)
-----------------------------------------------------------
+    Multi-Language Support: Easily switch between English, German, and Spanish via the UI.
 
-A) 🚀 GENERATOR
-Hier erstellst du deine Charts. 
-1. Wähle eine Strategie (siehe unten).
-2. Lade eine .chart oder .mid Datei.
-3. Das Tool berechnet die Noten und fragt dich nach dem Speicherort.
+    Real-Time Feedback: Includes a progress bar and a live log ("Blackbox") showing the exact file path currently being processed.
 
-B) 📚 LIBRARY BUILDER
-Hier "fütterst" du das Wissen des Tools.
-Wähle einen Ordner mit fertigen, guten Songs aus (z.B. Rock Band Exporte).
-Das Tool lernt die Abfolgen der Profis und speichert sie in der 
-Datei 'chart_library.json'. Je mehr Songs du einliest, desto 
-besser werden deine Ergebnisse!
+    Safety First: A dedicated "Stop Process" button allows you to cancel long training sessions without closing the application.
 
-----------------------------------------------------------
-3. DIE STRATEGIEN (Welche soll ich wählen?)
-----------------------------------------------------------
+🛠 Installation
 
-- Optimale Mischung (Hybrid): 
-  Das Tool schaut zuerst in sein gelerntes Wissen. Findet es nichts, 
-  rechnet es mathematisch nach. (Beste Wahl für fast alles!)
+    Requirement: Ensure you have Python 3.8+ installed.
 
-- Profi-Charts (Nur DB): 
-  Nutzt NUR das Wissen aus deiner Datenbank. Klingt sehr menschlich, 
-  kann aber Lücken lassen, wenn das Tool ein Pattern noch nicht kennt.
+    Dependencies: Install the required MIDI processing library:
+    Bash
 
-- Reine Heuristik (Mathematisch): 
-  Ignoriert das Wissen und rechnet starr nach deinen Regler-Einstellungen. 
-  Gut für sehr gleichmäßige, technische Charts.
+    pip install mido
 
-----------------------------------------------------------
-4. TIPPS & TRICKS
-----------------------------------------------------------
-- INFO-BUTTONS: Neben den Reglern findest du kleine "i"-Symbole. 
-  Fahre mit der Maus darüber, um eine kurze Erklärung zur Funktion 
-  zu erhalten.
-  
-- STOPP-TASTE: Wenn du einen riesigen Ordner analysierst und es 
-  zu lange dauert, kannst du den Vorgang jederzeit sicher abbrechen.
+    Files: Place main.py, processor.py, and gui_components.py in the same folder.
 
-- MIDI-DATEIEN: Wenn du eine .mid lädst, fragt dich das Tool, welche 
-  Spur (z.B. PART GUITAR) genutzt werden soll.
+    Launch: Run the application via:
+    Bash
 
-----------------------------------------------------------
-5. PROGRAMM STARTEN (LINUX)
-----------------------------------------------------------
-Du kannst das Programm bequem über die 'start_chartmaster.sh' starten.
-1. Rechtsklick auf die Datei -> Eigenschaften -> Berechtigungen.
-2. "Datei als Programm ausführen" aktivieren.
-3. Doppelklick auf die Datei.
+    python main.py
 
-Alternativ im Terminal:
-chmod +x start_chartmaster.sh
-./start_chartmaster.sh
+🚀 How to Use
+1. Building your Knowledge Base (Library Builder)
 
-----------------------------------------------------------
-6. WINDOWS EXE VERSION
-----------------------------------------------------------
-Wenn du eine 'chart_master.exe' hast, benötigst du KEIN Python. 
-Einfach die EXE starten. Die 'chart_library.json' muss im selben 
-Ordner liegen wie die EXE, damit dein Wissen geladen wird.
+Before generating high-quality charts, the tool needs "knowledge":
 
-Viel Spaß beim Charten!
+    Go to the Library Builder tab.
+
+    Select your Clone Hero "Songs" folder.
+
+    Click Extract Knowledge. The tool will scan all .chart and .mid files and store patterns in chart_library.json.
+
+    The log will show you exactly which artist and song is currently being analyzed.
+
+2. Generating Charts
+
+    Switch to the Generator tab.
+
+    Choose your Method:
+
+        Hybrid: Best of both worlds (DB + Math).
+
+        Pro Charts (DB only): Only uses patterns it has seen before.
+
+        Pure Heuristics: Uses only the sliders and mathematical logic.
+
+    Adjust the Profiles & Intensity sliders to define how "busy" the lower difficulties should be.
+
+    Click Load & Generate, select your Expert-only file, and save the new multi-difficulty chart.
+
+📁 Project Structure
+File	Description
+main.py	The core application, UI logic, and language management.
+processor.py	The "Brain" – handles MIDI/Chart parsing and AI logic.
+gui_components.py	UI layout, Sliders, Tabs, and Tooltips.
+chart_library.json	The database where learned patterns are stored.
+user_settings.json	Stores your language and slider preferences.
