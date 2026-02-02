@@ -15,7 +15,7 @@ class SmartProcessor:
     def load_db(self):
         if os.path.exists(self.lib_file):
             try:
-                with open(self.lib_file, "r") as f: 
+                with open(self.lib_file, "r", encoding="utf-8") as f: 
                     db = json.load(f)
                     if "patterns" not in db: db["patterns"] = {}
                     if "learned_files" not in db: db["learned_files"] = []
@@ -44,15 +44,15 @@ class SmartProcessor:
         """Mathematische Regeln für die Notenauswahl (Heuristik)."""
         if not allowed_frets: return None
         
-        # Akkord-Vereinfachung basierend auf deinen Wünschen
+        # Akkord-Vereinfachung
         if diff == "EasySingle":
-            res = [str(f) for f in allowed_frets[:2]] # Max 2 Noten
+            res = [str(f) for f in allowed_frets[:1]] # Nur Single Notes für Easy
         elif diff == "MediumSingle":
-            res = [str(f) for f in allowed_frets[:3]] # Max 3 Noten
+            res = [str(f) for f in allowed_frets[:2]] # Max 2 Noten für Medium
         else:
-            res = [str(f) for f in allowed_frets]
+            res = [str(f) for f in allowed_frets[:3]] # Max 3 Noten für Hard
 
-        # Fret-Distanz Optimierung für bessere Spielbarkeit
+        # Fret-Distanz Optimierung
         if len(res) == 1 and diff == "EasySingle":
             current = int(res[0])
             if abs(current - self.last_fret) > 2:
@@ -95,7 +95,7 @@ class SmartProcessor:
                     res = self._get_best_pattern(key, trg)
                     if res: stats["lib"] += 1
                 
-                if not res and "Math" not in strategy and "Heuristik" not in strategy:
+                if not res:
                     allowed = sorted([f for f in f_only if f <= max_f])
                     if len(allowed) > (2 if trg == "EasySingle" else 3):
                         stats["simplified"] += 1
@@ -183,3 +183,19 @@ class SmartProcessor:
                 if t not in notes: notes[t] = []
                 notes[t].append((f, ln))
         return notes
+
+    # --- NEU: DIE HIGHWAY-EXTRAKTION ---
+    def _extract_all_generated_notes(self, chart_content):
+        """Bereitet die Daten für die Highway-Vorschau in der GUI auf."""
+        preview_data = {}
+        sections = re.findall(r"\[(\w+Single)\]\s*\{([^}]+)\}", chart_content, re.DOTALL)
+        for diff_name, body in sections:
+            notes_in_diff = {}
+            for line in body.strip().split("\n"):
+                m = re.search(r"(\d+)\s*=\s*N\s*(\d+)\s*(\d+)", line)
+                if m:
+                    tick, f, ln = m.groups()
+                    if tick not in notes_in_diff: notes_in_diff[tick] = []
+                    notes_in_diff[tick].append((f, ln))
+            preview_data[diff_name] = notes_in_diff
+        return preview_data
