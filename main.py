@@ -96,20 +96,54 @@ class App:
                     canvas.create_oval(x-10, y-5, x+10, y+5, fill=colors[f_idx], outline="white", width=1)
 
     def run_gen(self):
-        f = filedialog.askopenfilename(filetypes=[("Charts", "*.chart *.mid")])
-        if not f: return
-        self.set_status("status_gen", "#3498db", 50)
-        try:
-            setts = {d: {"speed": v[0].get(), "frets": v[1].get()} for d, v in self.tab_gen.sliders.items()}
-            res, stats = self.proc.generate(f, setts, self.tab_gen.strat_var.get())
-            self.last_gen_data = self.proc._extract_all_generated_notes(res)
-            self.update_preview()
-            save = filedialog.asksaveasfilename(defaultextension=".chart", initialfile="notes.chart")
-            if save:
-                with open(save, "w", encoding="utf-8") as o: o.write(res)
-                self.log(f"SAVED: {os.path.basename(save)}")
-            self.set_status("status_ready", v=100)
-        except Exception as e: self.log(f"ERR: {e}"); self.set_status("status_ready", "#c0392b", 0)
+        # 1. Quellordner wählen
+        folder = filedialog.askdirectory(title="Ordner mit zu chartenden Dateien wählen")
+        if not folder: return
+        
+        # 2. Bestätigung für das Überschreiben einholen (Sicherheit zuerst!)
+        if not messagebox.askyesno("Bulk-Modus", "Dies wird vorhandene 'notes.chart' Dateien in den jeweiligen Unterordnern überschreiben. Fortfahren?"):
+            return
+
+        self.set_status("status_gen", "#3498db", 0)
+        
+        # 3. Alle relevanten Dateien in Unterordnern finden
+        files_to_process = []
+        for root, dirs, files in os.walk(folder):
+            for file in files:
+                if file.lower().endswith(('.chart', '.mid')):
+                    files_to_process.append(os.path.join(root, file))
+
+        if not files_to_process:
+            self.log("Keine kompatiblen Dateien gefunden.")
+            return
+
+        # 4. Verarbeitungsschleife
+        total = len(files_to_process)
+        for i, f_path in enumerate(files_to_process):
+            try:
+                # Progress-Update
+                self.set_status(f"Verarbeite {i+1}/{total}", "#3498db", int(((i+1)/total)*100))
+                
+                # Einstellungen aus den Slidern lesen
+                setts = {d: {"speed": v[0].get(), "frets": v[1].get()} for d, v in self.tab_gen.sliders.items()}
+                
+                # Generierung starten
+                res, stats = self.proc.generate(f_path, setts, self.tab_gen.strat_var.get())
+                
+                # Zielpfad: Wir überschreiben die Quelldatei, wenn sie .chart ist, 
+                # oder erstellen eine notes.chart im selben Ordner bei .mid
+                target_path = f_path if f_path.lower().endswith('.chart') else os.path.join(os.path.dirname(f_path), "notes.chart")
+                
+                with open(target_path, "w", encoding="utf-8") as o:
+                    o.write(res)
+                
+                self.log(f"OK: {os.path.basename(f_path)}")
+                
+            except Exception as e:
+                self.log(f"ERR bei {os.path.basename(f_path)}: {e}")
+
+        self.set_status("status_ready", v=100)
+        messagebox.showinfo("Fertig", f"{total} Dateien wurden verarbeitet.")
 
     def start_learn(self):
         p = self.tab_lib.ent_path.get()
